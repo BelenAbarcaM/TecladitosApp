@@ -25,7 +25,7 @@ El backend está construido con Node.js, Express y MongoDB, y expone una API RES
 1. Clonar el repositorio:
 
 ```bash
-git clone <url-del-repositorio>
+git clone (https://github.com/BelenAbarcaM/TecladitosApp.git)
 cd teclados
 ```
 
