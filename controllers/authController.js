@@ -19,7 +19,8 @@ async function registrar(req, res) {
 
     res.status(201).json({ mensaje: 'Usuario registrado con éxito', id: nuevoUsuario._id });
   } catch (error) {
-    res.status(400).json({ error: 'No se pudo registrar el usuario' });
+    console.error('Error al registrar usuario:', error);
+    res.status(400).json({ error: 'No se pudo registrar el usuario', detalle: error.message });
   }
 }
 
