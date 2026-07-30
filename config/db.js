@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-const uri = 'mongodb://localhost:27017';
-//const uri = 'mongodb+srv://belen:abelen2009@cluster0.ktfhew2.mongodb.net/?appName=Cluster0';
+const uri = proccess.env.MONGO 
+
 
 async function conectarBD() {
   try {
