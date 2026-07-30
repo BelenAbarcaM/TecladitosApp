@@ -5,7 +5,7 @@ const Usuario = require('../models/Usuario');
 // Registro de un nuevo usuario
 async function registrar(req, res) {
   try {
-    const { nombre, email, clave } = req.body;
+    const { nombre, correo, clave } = req.body;
 
     // 1. Generar un salt (semilla aleatoria) para el hash
     const salt = await bcrypt.genSalt(10); // 10 rondas de generación de salt
@@ -14,38 +14,36 @@ async function registrar(req, res) {
     const hash = await bcrypt.hash(clave, salt);
 
     // 3. Crear y guardar el nuevo usuario con la contraseña hasheada
-    // El modelo Usuario requiere el campo "correo", por eso mapeamos email -> correo
-    const nuevoUsuario = new Usuario({ nombre, correo: email, clave: hash });
+    const nuevoUsuario = new Usuario({ nombre, correo, clave: hash });
     await nuevoUsuario.save();
 
     res.status(201).json({ mensaje: 'Usuario registrado con éxito', id: nuevoUsuario._id });
   } catch (error) {
-    console.error('Error al registrar usuario:', error);
-    res.status(400).json({ error: 'No se pudo registrar el usuario', detalle: error.message });
+    res.status(400).json({ error: 'No se pudo registrar el usuario' });
   }
 }
 
 // Login de usuario (autenticación)
 async function login(req, res) {
   try {
-    const { email, clave } = req.body;
+    const { correo, clave } = req.body;
 
-    // 1. Buscar al usuario por correo (el modelo usa el campo "correo")
-    const usuario = await Usuario.findOne({ correo: email });
+    // 1. Buscar al usuario por correo
+    const usuario = await Usuario.findOne({ correo });
     if (!usuario) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    // 2. Verificar la contraseña
+    // 2. Verificar la contraseña 
     const passwordOk = await bcrypt.compare(clave, usuario.clave);
     if (!passwordOk) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
+      return res.status(401).json({ error: 'Credenciales inválidas' }); 
     }
 
     // 3. Credenciales válidas: Generar token JWT
-    const datosToken = { id: usuario._id };
-    const secreto = process.env.SECRETO;
-    const opciones = { expiresIn: '1h' };
+    const datosToken = { id: usuario._id };                     
+    const secreto = process.env.SECRETO; 
+    const opciones = { expiresIn: '1h' };                      
     const token = jwt.sign(datosToken, secreto, opciones);
 
     // 4. Enviar el token al cliente
@@ -60,7 +58,7 @@ async function verificarTokenController(req, res) {
   res.send('verificado');
 }
 
-// Devuelve los datos del usuario actualmente logueado
+// Devuelve los datos del usuario actualmente logueado 
 async function usuarioLogueado(req, res) {
   try {
     const usuario = await Usuario.findById(req.usuarioId).select('-clave');
@@ -69,11 +67,7 @@ async function usuarioLogueado(req, res) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // index.js del frontend lee "email", pero el modelo guarda "correo" -> alineamos la respuesta
-    const usuarioRespuesta = usuario.toObject();
-    usuarioRespuesta.email = usuarioRespuesta.correo;
-
-    res.json(usuarioRespuesta);
+    res.json(usuario);
   } catch (error) {
     console.error('Error obteniendo el usuario:', error);
     res.status(500).json({ error: 'Error al obtener los datos del usuario' });

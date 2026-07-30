@@ -3,7 +3,7 @@ const btnGuardar = document.getElementById('btn-guardar');
 btnGuardar.addEventListener('click', async () => {
 
   const usuario = {
-    email: document.getElementById('email').value,
+    correo: document.getElementById('correo').value,
     clave: document.getElementById('clave').value,
   };
 
