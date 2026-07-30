@@ -14,7 +14,8 @@ async function registrar(req, res) {
     const hash = await bcrypt.hash(clave, salt);
 
     // 3. Crear y guardar el nuevo usuario con la contraseña hasheada
-    const nuevoUsuario = new Usuario({ nombre, email, clave: hash });
+    // El modelo Usuario requiere el campo "correo", por eso mapeamos email -> correo
+    const nuevoUsuario = new Usuario({ nombre, correo: email, clave: hash });
     await nuevoUsuario.save();
 
     res.status(201).json({ mensaje: 'Usuario registrado con éxito', id: nuevoUsuario._id });
@@ -29,8 +30,8 @@ async function login(req, res) {
   try {
     const { email, clave } = req.body;
 
-    // 1. Buscar al usuario por email
-    const usuario = await Usuario.findOne({ email });
+    // 1. Buscar al usuario por correo (el modelo usa el campo "correo")
+    const usuario = await Usuario.findOne({ correo: email });
     if (!usuario) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
@@ -68,7 +69,11 @@ async function usuarioLogueado(req, res) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.json(usuario);
+    // index.js del frontend lee "email", pero el modelo guarda "correo" -> alineamos la respuesta
+    const usuarioRespuesta = usuario.toObject();
+    usuarioRespuesta.email = usuarioRespuesta.correo;
+
+    res.json(usuarioRespuesta);
   } catch (error) {
     console.error('Error obteniendo el usuario:', error);
     res.status(500).json({ error: 'Error al obtener los datos del usuario' });
