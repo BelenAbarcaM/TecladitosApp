@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
@@ -25,7 +24,14 @@ app.use('/api', authRoutes);
 // Rutas del CRUD de teclados: /api/teclados
 app.use('/api/teclados', tecladoRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor API escuchando en http://localhost:${PORT}`);
-});
+// En local seguimos levantando el servidor normalmente.
+// En Vercel, la plataforma invoca la app exportada abajo, así que este
+// listen() no se ejecuta en producción.
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Servidor API escuchando en http://localhost:3000`);
+  });
+}
+
+module.exports = app;
